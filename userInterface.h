@@ -14,6 +14,6 @@ enum class Action
 
 std::string getUserText(std::string endOfInput);
 Encryption getEncryption(const std::vector<std::string> &encryptions);
-std::string getPassword();
+std::string getPassword(std::string message);
 Action getAction();
 #endif

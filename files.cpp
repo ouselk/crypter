@@ -1,19 +1,23 @@
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include "files.h"
 
 
 
-std::string writeFile(std::string text, std::string fileName)
+std::string writeFile(std::string text, std::string fileName, bool clearFile)
 {
-	//Р¤СѓРЅРєС†РёСЏ Р·Р°РїРёСЃС‹РІР°РµС‚ СЃС‚СЂРѕРєСѓ text РІ С„Р°Р№Р» СЃ РёРјРµРЅРµРј fileName.
-	//Р•СЃР»Рё С‚Р°РєРѕРіРѕ С„Р°Р№Р»Р° РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚ - С„Р°Р№Р» СЃРѕР·РґР°РµС‚СЃСЏ,
-	//РµСЃР»Рё С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚ - РµРіРѕ СЃРѕРґРµСЂР¶РёРјРѕРµ РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚СЃСЏ.
-	//Р¤СѓРЅРєС†РёСЏ РІРѕР·РІСЂР°С‰Р°РµС‚ РёРјСЏ С„Р°Р№Р»Р° РёР»Рё РѕС€РёР±РєСѓ.
+	//Функция записывает строку text в файл с именем fileName.
+	//Если такого файла не существует - файл создается,
+	//если файл существует - его содержимое перезаписывается.
+	//Функция возвращает имя файла или ошибку.
 	std::ofstream fout;
-	fout.open(fileName);
+	if (!clearFile)
+		fout.open(fileName, std::ios_base::app);
+	else
+		fout.open(fileName);
 	if (!fout.is_open())
-		return "РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°";
+		return "Ошибка открытия файла";
 	fout << text;
 	fout.close();
 
@@ -22,14 +26,14 @@ std::string writeFile(std::string text, std::string fileName)
 
 std::string readFile(std::string fileName)
 {
-	//Р¤СѓРЅРєС†РёСЏ СЃС‡РёС‚С‹РІР°РµС‚ С‚РµРєСЃС‚ РёР· С„Р°Р№Р»Р° Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РµРіРѕ,
-	//РµСЃР»Рё С„Р°Р№Р» РЅРµ Р±С‹Р» РїСЂРѕС‡РёС‚Р°РЅ, РІРѕР·РІСЂР°С‰Р°РµС‚ СЃС‚СЂРѕРєСѓ
-	//РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°.
+	//Функция считывает текст из файла и возвращает его,
+	//если файл не был прочитан, возвращает строку
+	//Ошибка открытия файла.
 	std::ifstream fin(fileName);
 	std::string text;
 	
 	if (!fin.is_open())
-		return "РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°";
+		return "Ошибка открытия файла";
 
 	while (fin)
 	{
@@ -40,4 +44,29 @@ std::string readFile(std::string fileName)
 	text.pop_back();
 	fin.close();
 	return text;
+}
+
+std::string readString(std::string fileName, int index)
+{
+	std::ifstream fin(fileName);
+
+	if (!fin.is_open())
+		throw "Ошибка открытия файла";
+
+	int i = 0;
+	while (fin)
+	{
+		std::string string;
+		fin >> string;
+		if (index == i++)
+			return string;
+	}
+
+	throw "Не найдина строка с индексом " + index;
+}
+
+bool fileExists(std::string fileName)
+{
+	std::ifstream fin(fileName);
+	return fin.is_open();
 }
