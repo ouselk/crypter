@@ -112,7 +112,7 @@ std::string simpleTableCrypt(std::string text, int n, int m)
     std::vector<std::vector<unsigned char>> table(n);
     for (auto &col : table)
         col=std::vector<unsigned char>(m);
-    std::cout << text << std::endl;
+//    std::cout << text << std::endl;
 
     int index = 0;
     for (int j = 0; j < m; j++)

@@ -8,6 +8,52 @@
 #include "crypt.h"
 #include "funcs.h"
 
+int doAction(Action action, Encryption crypt, std::string decryptedFilename, std::string encryptedFilename)
+{
+	if (action == Action::crypt)
+	{ 
+		writeFile(getUserText("0"), decryptedFilename);
+		std::string key = getKey(crypt);
+		writeFile(readString(encryptedFilename, 0) + '\n' + key + '\n', encryptedFilename);
+//		std::cout << readFile(decryptedFilename);
+		try{
+		std::string encryptedText = encrypt(readFile(decryptedFilename), crypt, key);
+		writeFile(encryptedText, encryptedFilename, false);    
+		} catch(const char* str)
+		{
+			std::cout << str << std::endl;
+			std::cout << "Попробуйте выбрать другое действие."<<std::endl<<std::endl;;
+			Action act = getAction();
+			Encryption crypt = getEncryption(ENCRYPTIONS);
+			doAction(act, crypt, decryptedFilename, encryptedFilename);
+		}
+	}
+	else if (action == Action::decrypt)
+	{
+		std::string password = readString(encryptedFilename, 0);
+		std::string encrypted = readFile(encryptedFilename);
+		
+		deleteSubStr(encrypted, password + '\n');
+
+		try{
+			std::string decryptedText = decrypt(encrypted, crypt);
+			writeFile(decryptedText, decryptedFilename);
+		} catch(const char* str)
+		{
+			std::cout << str << std::endl;
+			std::cout << "Попробуйте другое действие." << std::endl<<std::endl;
+			Action act = getAction();
+			crypt = getEncryption(ENCRYPTIONS);
+			doAction(act, crypt, decryptedFilename, encryptedFilename);
+		}
+	}
+
+	else if (action == Action::error)
+		return -1;
+	
+	return 0;
+}
+
 int main()
 {
 	SetConsoleCP(1251);
@@ -31,52 +77,23 @@ int main()
 		int i = 3;
 		do
 		{
-			std::cout << "Осталось " << i-- << " попытки." << std::endl;
-			userPass = getPassword("Введите пароль для использования программы: ");
-		} while (userPass != truePass && i > 0);
+			if (i == 0)
+			{
+				std::cout << "Попытка перебора пароля. Программа удаляет файл и завершает работу." << std::endl;
+				remove(encryptedFilename.c_str());
+				return -1;
+			}
+			i--;
+			std::cout << "Осталось " << i << " попытки." << std::endl;
+			userPass = getPassword("Введите пароль для использования программы: ");	
+		} while (userPass != truePass);
 
-		if (i == 0)
-		{
-			std::cout << "Попытка перебора пароля. Программа удаляет файл и завершает работу." << std::endl;
-			remove(encryptedFilename.c_str());
-			return -1;
-		}
+
 	}
 
 	Action action = getAction();
 	Encryption crypt = getEncryption(ENCRYPTIONS);
-	if (action == Action::crypt)
-	{ 
-		writeFile(getUserText("0"), decryptedFilename);
-		std::string key = getKey(crypt);
-		writeFile(readString(encryptedFilename, 0) + '\n' + key + '\n', encryptedFilename);
-//		std::cout << readFile(decryptedFilename);
-		try{
-		std::string encryptedText = encrypt(readFile(decryptedFilename), crypt, key);
-		writeFile(encryptedText, encryptedFilename, false);    
-		} catch(const char* str)
-		{
-			std::cout << str << std::endl;
-			return -1;  
-		}
-	}
-	else if (action == Action::decrypt)
-	{
-		std::string password = readString(encryptedFilename, 0);
-		std::string encrypted = readFile(encryptedFilename);
-		
-		deleteSubStr(encrypted, password + '\n');
 
-		try{
-			std::string decryptedText = decrypt(encrypted, crypt);
-			writeFile(decryptedText, decryptedFilename);
-		} catch(const char* str)
-		{
-			std::cout << str << std::endl;
-			return -1;
-		}
-	}
-
-	else if (action == Action::error)
-		return -1;
+	if (doAction(action, crypt, decryptedFilename, encryptedFilename)==0)
+		std::cout << "Успех!";
 }
