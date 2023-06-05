@@ -7,16 +7,18 @@
 
 enum class Encryption
 {
-	cezar,
-	keyword
+	keyword,
+	simpleTable
 };
 
-const std::vector<std::string> ENCRYPTIONS = {"Шифр Цезаря", "Шифр с использованием кодового слова"};
+const std::vector<std::string> ENCRYPTIONS = {"Шифр со сдвигом по кодовому слову", "Простой табличный шифр"};
 
 std::string encrypt(std::string text, Encryption crypt, std::string key="");
 std::string decrypt(std::string crypted, Encryption crypt);
 std::string cezarCrypt(std::string text);
 std::string keyword_encrypted(std::string text, std::string key);
 std::string keyword_decrypted(std::string encrypted, std::string key);
+std::string simpleTableCrypt(std::string text, int n, int m);
+std::string simpleTableDecrypt(std::string text, int n, int m);
 
 #endif

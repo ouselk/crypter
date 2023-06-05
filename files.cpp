@@ -1,5 +1,6 @@
 #include <fstream>
 #include <ios>
+#include <string>
 #include <iostream>
 #include "files.h"
 
@@ -38,7 +39,7 @@ std::string readFile(std::string fileName)
 	while (fin)
 	{
 		std::string temp;
-		fin >> temp;
+		std::getline(fin, temp);
 		text+=temp + '\n';
 	}
 	text.pop_back();

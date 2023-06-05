@@ -48,16 +48,17 @@ int main()
 	if (action == Action::crypt)
 	{ 
 		writeFile(getUserText("0"), decryptedFilename);
-		std::string key = "";
-		if (crypt == Encryption::keyword)
-		{
-			key = getPassword("Введите ключ шифрования: ");
-			
-			writeFile(readString(encryptedFilename, 0) + '\n' + key + '\n', encryptedFilename);
-		}
-
+		std::string key = getKey(crypt);
+		writeFile(readString(encryptedFilename, 0) + '\n' + key + '\n', encryptedFilename);
+//		std::cout << readFile(decryptedFilename);
+		try{
 		std::string encryptedText = encrypt(readFile(decryptedFilename), crypt, key);
 		writeFile(encryptedText, encryptedFilename, false);    
+		} catch(const char* str)
+		{
+			std::cout << str << std::endl;
+			return -1;  
+		}
 	}
 	else if (action == Action::decrypt)
 	{
@@ -66,11 +67,16 @@ int main()
 		
 		deleteSubStr(encrypted, password + '\n');
 
-		std::string decryptedText = decrypt(encrypted, crypt);
-		writeFile(decryptedText, decryptedFilename);
+		try{
+			std::string decryptedText = decrypt(encrypted, crypt);
+			writeFile(decryptedText, decryptedFilename);
+		} catch(const char* str)
+		{
+			std::cout << str << std::endl;
+			return -1;
+		}
 	}
 
 	else if (action == Action::error)
 		return -1;
 }
-

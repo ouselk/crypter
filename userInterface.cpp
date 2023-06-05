@@ -4,6 +4,7 @@
 #include <vector>
 #include "userInterface.h"
 #include "crypt.h"
+#include "funcs.h"
 
 
 
@@ -58,6 +59,39 @@ std::string getPassword(std::string message)
 	return pass;
 }
 
+std::string getPassword(std::string message, bool keyValid(std::string))
+{
+	std::string key = getPassword(message);
+	if (!keyValid(key))
+		throw "Введен неверный ключ.";
+	return key;
+}
+
+std::string getKey(Encryption encrypt)
+{
+	std::string key = "";
+	try
+	{
+		if (encrypt == Encryption::keyword)
+		{
+			key = getPassword("Введите ключ шифрования, не содержащий одинаковых символов: ");
+			checkKeyKE(key);
+		}
+		else if (encrypt == Encryption::simpleTable)
+		{
+			key = getPassword("Введите размер таблицы в формате NxM: ");
+			checkKeyST(key);
+		}
+	}
+	catch (const char* str)
+	{
+		std::cout << str << std::endl;
+		key = getKey(encrypt);
+	}
+
+	return key;
+}
+
 Action getAction()
 {
 	char act;
@@ -74,4 +108,21 @@ Action getAction()
 
 	return Action::error;
 
+}
+
+std::string getKey(std::string &crypted, Encryption crypt)
+{
+	std::string key = "";
+	for (auto s : crypted)
+	{
+		if (s == '\n')
+			break;
+		key += s;
+	}
+
+	try{ checkKey(key, crypt);}
+	catch (...) {throw "Неверно указан шифр.";}
+	
+	deleteSubStr(crypted, key + '\n');
+	return key;
 }
