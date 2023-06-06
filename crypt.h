@@ -10,11 +10,13 @@ enum class Encryption
 	keyword,
 	simpleTable,
 	vidger,
-	rsa
+	rsa,
+	gronsfeld,
+	atbash
 };
 
 const std::vector<std::string> ENCRYPTIONS = {"Шифр со сдвигом по кодовому слову", "Простой табличный шифр",
-											  "Шифр Виженера", "RSA"};
+											  "Шифр Виженера", "RSA", "Шифр Гронсфельда", "Атбаш"};
 
 std::string encrypt(std::string text, Encryption crypt, std::string key="");
 std::string decrypt(std::string crypted, Encryption crypt);
@@ -27,5 +29,8 @@ std::string vidgerCrypt(std::string text, std::string key);
 std::string vidgerDecrypt(std::string key, std::string text);
 std::string rsaCrypt(std::string msg, int n, int e);
 std::string rsaDecrypt(std::string msg, int n, int d);
+std::string groncfeldCrypted(std::string text, int key);
+std::string groncfeldDecrypted(std::string crypted_text, int key);
+std::string atbashEncrypted(std::string text);
 
 #endif

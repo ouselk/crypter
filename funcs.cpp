@@ -169,3 +169,29 @@ int getD(int e, int fN)
         d+=fN;
     return d;
 }
+
+//гронсфельд
+int checkKeyGF(std::string key)
+{
+
+    if (!isNumber(key))
+    {
+        throw "Неверно введен ключ (введите число).";
+    }
+    int nkey = stoi(key);
+    if (nkey < 1)
+        throw "Неверно введен ключ (должно быть натуральное число)";
+
+    return nkey;
+}
+
+std::vector<int> cifGF(int key) {
+    std::vector<int> keys_cif;
+    int cif;
+    for (int i = 0; key > 0; key /= 10) {
+        cif = key % 10;
+        keys_cif.push_back(cif);
+    }
+    std::reverse(keys_cif.begin(), keys_cif.end());
+    return keys_cif;
+}

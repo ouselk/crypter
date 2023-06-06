@@ -99,6 +99,11 @@ std::string getKey(Encryption encrypt)
 
 			checkKeyRSA(key);
 		}
+		else if (encrypt == Encryption::gronsfeld)
+		{
+			key = getPassword("¬ведите натуральное число: ");
+			checkKeyGF(key);
+		}
 	}
 	catch (const char* str)
 	{

@@ -25,4 +25,8 @@ int checkKeyRSA(std::string key);
 void genEuclidAlg(int a, int b, int res[3]);
 int getD(int e, int fN);
 
+//gronsfeld
+int checkKeyGF(std::string key);
+std::vector<int> cifGF(int key);
+
 #endif

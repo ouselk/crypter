@@ -9,7 +9,7 @@
 
 std::string encrypt(std::string text, Encryption crypt, std::string key)
 {
-	std::string crypted = text;
+	std::string crypted = "Empty";
     if (text.empty())
         throw "Нечего зашифровывать";
 	switch (crypt)
@@ -37,7 +37,17 @@ std::string encrypt(std::string text, Encryption crypt, std::string key)
             crypted = rsaCrypt(text, n, e);
             break;
         }
-
+        case Encryption::gronsfeld:
+        {
+            int k = checkKeyGF(key);
+            crypted = groncfeldCrypted(text, k);
+            break;
+        }
+        case Encryption::atbash:
+        {
+            crypted = atbashEncrypted(text);
+            break;
+        }
 	}
 
 	return crypted;
@@ -75,6 +85,17 @@ std::string decrypt(std::string crypted, Encryption crypt)
             genEuclidAlg(216, e, res);
             int d = res[2];
             decrypted = rsaDecrypt(crypted, n, d);
+            break;
+        }
+        case Encryption::gronsfeld:
+        {
+            std::string key = getKey(crypted, crypt);
+            decrypted = groncfeldDecrypted(crypted, checkKeyGF(key));
+            break;
+        }
+        case Encryption::atbash:
+        {
+            decrypted = atbashEncrypted(crypted);
             break;
         }
     }
@@ -248,4 +269,88 @@ std::string rsaCrypt(std::string msg, int n, int e)
 std::string rsaDecrypt(std::string msg, int n, int d)
 {    
     return rsaCrypt(msg, n, d);
+}
+
+//Gronsfeld
+
+std::string groncfeldCrypted(std::string text, int key) {
+    int step = 0;
+    std::string result;
+    //int key_c = checkKey(key);
+    std::vector<int>key_cif = cifGF(key);
+
+    for (int i = 0; i < text.size(); i++)
+    {
+        unsigned char ascii = text[i];
+        int curr_key = key_cif[step];
+        if (ascii == 32)
+            result += " ";
+        if (ascii == '\n')
+            result += '\n';
+        else
+        {
+            if (int(ascii) + curr_key < 256)
+            {
+
+                result += static_cast<unsigned char> (int(ascii) + curr_key);
+            }
+
+            else
+                result += static_cast<unsigned char> ((int(ascii) + curr_key) % 223);
+            step = (step + 1) % key_cif.size();
+        }
+
+    }
+    return result;
+}
+std::string groncfeldDecrypted(std::string crypted_text, int key) {
+    int step = 0;
+    std::string result;
+    //int key_c = checkKey(key);
+    std::vector<int>key_cif = cifGF(key);
+
+    for (int i = 0; i < crypted_text.size(); i++)
+    {
+        unsigned char ascii = crypted_text[i];
+        int curr_key = key_cif[step];
+        if (ascii == 32)
+            result += " ";
+        if (ascii == '\n')
+            result += '\n';
+        else
+        {
+            if (int(ascii) - curr_key < 33)
+            {
+                result += static_cast<unsigned char> ((int(ascii) - curr_key) + 223);
+
+            }
+
+            else
+                result += static_cast<unsigned char> (int(ascii) - curr_key);
+            step = (step + 1) % key_cif.size();
+        }
+
+    }
+    return result;
+}
+
+// атбаш
+
+std::string atbashEncrypted(std::string text) {
+    int size = text.size();
+    int count = 0;
+    bool flag_1 = true;
+    std::string resultStr = "";
+    for (int i = 0; i < size; i++)
+    {
+        unsigned char askii = text[i];
+        if (text[i] == ' ')
+            resultStr += ' ';
+        else if (text[i] == '\n')
+            resultStr += '\n';
+        else
+            resultStr += static_cast<unsigned char>(255 - (askii - 33));
+
+    }
+    return resultStr;
 }
