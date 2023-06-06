@@ -15,6 +15,14 @@ std::string checkKeyKE(std::string key);
 std::map<unsigned char, unsigned char> getBaseAndChangeKE(std::string key);
 void deleteSubStr(std::string& string, const std::string& substr);
 
+//Простой табличный
 bool isNumber(std::string str);
 std::pair<int, int> checkKeyST(std::string key);
+
+//RSA
+int modulePow(int a, int x, int p);
+int checkKeyRSA(std::string key);
+void genEuclidAlg(int a, int b, int res[3]);
+int getD(int e, int fN);
+
 #endif

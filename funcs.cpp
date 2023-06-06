@@ -15,6 +15,9 @@ void checkKey(std::string key, Encryption crypt)
         case Encryption::simpleTable:
             checkKeyST(key);
             break;
+        case Encryption::rsa:
+            checkKeyRSA(key);
+            break;
     }
 }
 
@@ -96,4 +99,73 @@ std::pair<int, int> checkKeyST(std::string key)
         throw "Неверно введен ключ.";
     
     return std::pair<int, int>(std::stoi(nstr), std::stoi(mstr)); 
+}
+
+//RSA
+
+int checkKeyRSA(std::string key)
+{
+    if (!isNumber(key))
+        throw "Неправильно введен ключ.";
+    int e = std::stoi(key);
+    if (e>216)
+        throw "Неправильно введен ключ.";
+    for (int i = 2; i<216; i++)
+        if (e%i == 0 && 216%i==0)
+            throw "Неправильно введен ключ.";
+    return e;
+}
+
+int modulePow(int a, int x, int p)
+{
+  // т.к.         c = (a * b) mod m
+  // эквивалентно c = (a (mod m) * b (mod m)) mod m
+  // Работает алгоритм следующий:
+        // Пусть c = 1, n? = 0.
+      // Увеличим n? на 1.
+      // Установим c ? ( b ? c ) ( mod m ).
+      // Если n? < n, возвращаемся к шагу 2. В противном случае, c содержит правильный ответ c ? b n ( mod m ).
+  int h = 1;
+  a = a % p;
+  for (int i = 1; i <= x; i++) {
+    h = (static_cast<int64_t>(h) * a) % p;
+  }
+  return h;
+}
+
+void genEuclidAlg(int a, int b, int res[3])
+{
+  // Обобщенный (расширенный) расширенный алгоритм евклида
+  // получаем числа a и b, и массив res, в который запишем результат:
+  // на первое место - наибольший общий делитель,
+  // на второе место - коэффициент x при a
+  // на третье место - коэффициент y при b
+  // в выражении ax+by=gcd(a,b)
+  int U[3] {a, 1, 0};
+  int V[3] {b, 0, 1};
+  int T[3] {0};
+  
+  while (V[0] != 0)
+  {
+    int q = U[0] / V[0];
+    T[0] = U[0] % V[0];
+    T[1] = U[1] - q*V[1];
+    T[2] = U[2] - q*V[2];
+    std::copy(std::begin(V), std::end(V), std::begin(U));
+    std::copy(std::begin(T), std::end(T), std::begin(V));
+  }
+  res[0] = U[0];
+  res[1] = U[1];
+  res[2] = U[2];
+}
+
+
+int getD(int e, int fN)
+{
+    int res[3] = {0,0,0};
+    genEuclidAlg(fN, e, res);
+    int d = res[2];
+    if (d<0)
+        d+=fN;
+    return d;
 }

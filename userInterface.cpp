@@ -25,7 +25,7 @@ std::string getUserText(std::string endOfInput)
 			break;
 		text+=t+'\n';
 	}
-	text.erase(text.begin()); // удал€ем лишний \n
+//	text.erase(text.begin()); // удал€ем лишний \n
 	text.erase(text.end()-1);   // удал€ем еще один лишний \n
 
 	return text;
@@ -47,7 +47,10 @@ Encryption getEncryption(const std::vector<std::string> &encryptions)
 		std::cout << "¬ведите номер шифра: ";
 		std::cin >> encryption_code;
 		if (std::cin.fail())
+		{
     			std::cin.clear();
+				encryption_code=-1;
+		}
 		std::cin.ignore(32222, '\n');
 	} while (encryption_code < 0 || encryption_code >= encryptions.size());
 	
@@ -89,6 +92,12 @@ std::string getKey(Encryption encrypt)
 		else if (encrypt == Encryption::vidger)
 		{
 			key = getPassword("¬ведите ключ шифровани€: ");
+		}
+		else if (encrypt == Encryption::rsa)
+		{
+			key = getPassword("¬ведите число e, такое,что 1<e<216 и e взаимно простое с 216 : ");
+
+			checkKeyRSA(key);
 		}
 	}
 	catch (const char* str)

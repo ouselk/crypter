@@ -9,7 +9,6 @@
 
 std::string encrypt(std::string text, Encryption crypt, std::string key)
 {
-    std::cout << "encrypt" << std::endl;
 	std::string crypted = text;
     if (text.empty())
         throw "Нечего зашифровывать";
@@ -29,6 +28,13 @@ std::string encrypt(std::string text, Encryption crypt, std::string key)
         case Encryption::vidger:
         {
             crypted = vidgerCrypt(text,key);
+            break;
+        }
+        case Encryption::rsa:
+        {
+            int e = checkKeyRSA(key);
+            int n = 247;
+            crypted = rsaCrypt(text, n, e);
             break;
         }
 
@@ -58,6 +64,17 @@ std::string decrypt(std::string crypted, Encryption crypt)
         case Encryption::vidger:
         {
             decrypted = vidgerDecrypt(crypted, getKey(crypted, crypt));
+            break;
+        }
+        case Encryption::rsa:
+        {
+            std::string key = getKey(crypted, crypt);
+            int e = checkKeyRSA(key);
+            int n = 247;
+            int res[3] = {0,0,0};
+            genEuclidAlg(216, e, res);
+            int d = res[2];
+            decrypted = rsaDecrypt(crypted, n, d);
             break;
         }
     }
@@ -212,4 +229,23 @@ std::string vidgerDecrypt(std::string text, std::string key)
     }
 
     return crypted;
+}
+
+//RSA
+std::string rsaCrypt(std::string msg, int n, int e)
+{
+    std::string crypt = msg;
+    for (int i = 0; i<msg.size(); i++)
+    {
+        crypt[i] = static_cast<unsigned char>(modulePow(static_cast<unsigned char>(msg[i]), e, n));
+        if(crypt[i]>n)
+            throw "В тексте содержаться недопустимые символы";
+    }
+
+    return crypt;
+}
+
+std::string rsaDecrypt(std::string msg, int n, int d)
+{    
+    return rsaCrypt(msg, n, d);
 }
