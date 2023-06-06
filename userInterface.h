@@ -18,5 +18,6 @@ std::string getPassword(std::string message);
 std::string getKey(Encryption encrypt);
 Action getAction();
 std::string getKey(std::string &text, Encryption crypt);
+std::string getFileName(std::string message, std::string defaultName);
 
 #endif

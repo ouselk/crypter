@@ -25,7 +25,8 @@ std::string getUserText(std::string endOfInput)
 			break;
 		text+=t+'\n';
 	}
-	text.erase(text.begin());
+	text.erase(text.begin()); // удаляем лишний \n
+	text.erase(text.end()-1);   // удаляем еще один лишний \n
 
 	return text;
 }
@@ -45,6 +46,9 @@ Encryption getEncryption(const std::vector<std::string> &encryptions)
 			std::cout << i << ") " << encryptions[i] << std::endl;
 		std::cout << "Введите номер шифра: ";
 		std::cin >> encryption_code;
+		if (std::cin.fail())
+    			std::cin.clear();
+		std::cin.ignore(32222, '\n');
 	} while (encryption_code < 0 || encryption_code >= encryptions.size());
 	
 	return static_cast<Encryption>(encryption_code);
@@ -82,6 +86,10 @@ std::string getKey(Encryption encrypt)
 			key = getPassword("Введите размер таблицы в формате NxM: ");
 			checkKeyST(key);
 		}
+		else if (encrypt == Encryption::vidger)
+		{
+			key = getPassword("Введите ключ шифрования: ");
+		}
 	}
 	catch (const char* str)
 	{
@@ -94,12 +102,16 @@ std::string getKey(Encryption encrypt)
 
 Action getAction()
 {
-	char act;
+//	std::cin.ignore(32222, '\n');
+	char act = '0';
 	do
 	{
 		std::cout << "Вы хотите расшифровать или зашифровать текст [D\\C]: ";
-		std::cin >> act;
-	} while (act!='D' && act!='C');
+		std::string str = "";
+		getline(std::cin, str);
+		act = str[0];
+	} while (act!='D' && act!='C' &&
+			act!='d' && act!='c');
 	
 	if (act=='D' || act=='d')
 		return Action::decrypt;
@@ -125,4 +137,15 @@ std::string getKey(std::string &crypted, Encryption crypt)
 	
 	deleteSubStr(crypted, key + '\n');
 	return key;
+}
+
+std::string getFileName(std::string message, std::string defaultName)
+{
+	std::cout << "(В случае, если вы оставите строку пустой, будет использован файл по умолчанию)." << std::endl;
+	std::cout << message;
+	std::string filename;
+	getline(std::cin, filename);
+	if (filename.empty())
+		return defaultName;
+	return filename;
 }

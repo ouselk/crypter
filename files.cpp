@@ -42,7 +42,8 @@ std::string readFile(std::string fileName)
 		std::getline(fin, temp);
 		text+=temp + '\n';
 	}
-	text.pop_back();
+	text.pop_back(); //удал€ем лишний \n
+	text.pop_back(); //удал€ем лишний \b
 	fin.close();
 	return text;
 }
@@ -67,7 +68,18 @@ std::string readString(std::string fileName, int index)
 }
 
 bool fileExists(std::string fileName)
+//¬озвращает true, если файл существует и его перва€ строка не пуста€
 {
 	std::ifstream fin(fileName);
-	return fin.is_open();
+	if (!fin.is_open())
+		return false;
+	while (fin)
+	{
+		std::string str;
+		getline(fin, str);
+		if (!str.empty())
+			return true;
+	}
+
+	return false;
 }

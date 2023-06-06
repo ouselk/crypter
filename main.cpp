@@ -12,7 +12,11 @@ int doAction(Action action, Encryption crypt, std::string decryptedFilename, std
 {
 	if (action == Action::crypt)
 	{ 
-		writeFile(getUserText("0"), decryptedFilename);
+		if (!fileExists(decryptedFilename))
+		{
+			std::cout << "Файла " << decryptedFilename << " не существует, либо он пустой. " <<std::endl;
+			writeFile(getUserText("0"), decryptedFilename);
+		}
 		std::string key = getKey(crypt);
 		writeFile(readString(encryptedFilename, 0) + '\n' + key + '\n', encryptedFilename);
 //		std::cout << readFile(decryptedFilename);
@@ -32,10 +36,13 @@ int doAction(Action action, Encryption crypt, std::string decryptedFilename, std
 	{
 		std::string password = readString(encryptedFilename, 0);
 		std::string encrypted = readFile(encryptedFilename);
-		
-		deleteSubStr(encrypted, password + '\n');
 
+		
 		try{
+			deleteSubStr(encrypted, password);
+			if (encrypted.empty())
+				throw "Нечего расшfифровывать.";
+			deleteSubStr(encrypted, "\n");
 			std::string decryptedText = decrypt(encrypted, crypt);
 			writeFile(decryptedText, decryptedFilename);
 		} catch(const char* str)
@@ -62,11 +69,16 @@ int main()
 	const std::string DEFAULT_DECRYPTED_FILENAME = "decrypted.txt";
 	const std::string DEFAULT_ENCRYPTED_FILENAME = "encrypted.txt";
 
-	std::string decryptedFilename = DEFAULT_DECRYPTED_FILENAME;
-	std::string encryptedFilename = DEFAULT_ENCRYPTED_FILENAME;
+	std::string decryptedFilename =
+		getFileName("Введите имя файла, в котором содержится незашифрованный текст:",
+		DEFAULT_DECRYPTED_FILENAME);
+	std::string encryptedFilename = 
+		getFileName("Введите имя файла, в который будет помещен зашифрованный текст:",
+		DEFAULT_ENCRYPTED_FILENAME);
+
 	if (!fileExists(encryptedFilename))
 	{
-		std::cout << "Не существует файла с названием " << encryptedFilename << "." << std::endl;
+		std::cout << "Не существует файла с названием (или он пустой) " << encryptedFilename << "." << std::endl;
 		std::string password = getPassword("Задайте пароль для работы с программой, который будет помещен в начало файла: ");
 		writeFile(password + '\n', encryptedFilename);
 	}
@@ -83,15 +95,16 @@ int main()
 				remove(encryptedFilename.c_str());
 				return -1;
 			}
-			i--;
 			std::cout << "Осталось " << i << " попытки." << std::endl;
 			userPass = getPassword("Введите пароль для использования программы: ");	
+			if (userPass!=truePass)
+				i--;
 		} while (userPass != truePass);
 
 
 	}
 
-	Action action = getAction();
+	Action action    = getAction();
 	Encryption crypt = getEncryption(ENCRYPTIONS);
 
 	if (doAction(action, crypt, decryptedFilename, encryptedFilename)==0)

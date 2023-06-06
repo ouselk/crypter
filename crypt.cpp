@@ -9,7 +9,10 @@
 
 std::string encrypt(std::string text, Encryption crypt, std::string key)
 {
+    std::cout << "encrypt" << std::endl;
 	std::string crypted = text;
+    if (text.empty())
+        throw "Нечего зашифровывать";
 	switch (crypt)
 	{
         case Encryption::keyword:
@@ -21,6 +24,11 @@ std::string encrypt(std::string text, Encryption crypt, std::string key)
         {
             std::pair<int, int> pr = checkKeyST(key);
             crypted = simpleTableCrypt(text, pr.first, pr.second);
+            break;
+        }
+        case Encryption::vidger:
+        {
+            crypted = vidgerCrypt(text,key);
             break;
         }
 
@@ -45,6 +53,11 @@ std::string decrypt(std::string crypted, Encryption crypt)
             std::string key = getKey(crypted, crypt);
             std::pair <int, int> p = checkKeyST(key);
             decrypted = simpleTableDecrypt(crypted, p.first, p.second);
+            break;
+        }
+        case Encryption::vidger:
+        {
+            decrypted = vidgerDecrypt(crypted, getKey(crypted, crypt));
             break;
         }
     }
@@ -162,5 +175,41 @@ std::string simpleTableDecrypt(std::string text, int n, int m)
         for (int i = 0; i < n; i++)
             crypted += table[i][j];
     
+    return crypted;
+}
+
+// Шифр виженера
+
+std::string vidgerCrypt(std::string text, std::string key)
+{
+    std::string crypted = "";
+    size_t d = key.size();
+    int n = 256;
+    for (int i = 0; i < text.size(); i++)
+    {
+        unsigned char indT = text[i];
+        unsigned char indK = key[i%d];
+        unsigned char sym = (indT+indK)%n;
+        crypted+=sym;
+    }
+
+    return crypted;
+}
+
+std::string vidgerDecrypt(std::string text, std::string key)
+{
+    std::string crypted = "";
+    
+    int n = 256;
+    size_t d = key.size();
+    for (int i = 0; i < text.size(); i++)
+    {
+        unsigned char indT = text[i];
+        unsigned char indK = key[i%d];
+        unsigned char sym = (indT-indK)%n;
+        crypted+=sym;
+    //    std::cout << "Text: " << indT << " Key: " << indK << " Shifr: " << (indT+indK)%alphabet.size()+1 << std::endl;
+    }
+
     return crypted;
 }
