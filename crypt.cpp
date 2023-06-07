@@ -73,7 +73,9 @@ std::string decrypt(std::string crypted, Encryption crypt)
         }
         case Encryption::vidger:
         {
-            decrypted = vidgerDecrypt(crypted, getKey(crypted, crypt));
+            std::string key =getKey(crypted, crypt);
+
+            decrypted = vidgerDecrypt(crypted, key);
             break;
         }
         case Encryption::rsa:
@@ -218,49 +220,51 @@ std::string simpleTableDecrypt(std::string text, int n, int m)
 
 // Шифр виженера
 
-std::string vidgerCrypt(std::string text, std::string key)
-{
-    std::string crypted = "";
-    size_t d = key.size();
-    int n = 256;
-    for (int i = 0; i < text.size(); i++)
-    {
-        unsigned char indT = text[i];
-        unsigned char indK = key[i%d];
-        unsigned char sym = (indT+indK)%n;
-        crypted+=sym;
+std::string vidgerCrypt(std::string text, std::string key) {
+    int text_length = text.length();
+    int key_length = key.length();
+    std::string encrypted_text(text_length, ' ');
+
+    for (int i = 0; i < text_length; i++) {
+        unsigned char t = text[i];
+        unsigned char k =key[i%key_length];
+ //       unsigned char space = ' ';
+        if (isspace(t))
+            encrypted_text[i] = t;
+        else
+            encrypted_text[i] = ((t - ' ' + k - ' ') % 224) + ' ';
+        
     }
 
-    return crypted;
+    return encrypted_text;
 }
 
-std::string vidgerDecrypt(std::string text, std::string key)
-{
-    std::string crypted = "";
-    
-    int n = 256;
-    size_t d = key.size();
-    for (int i = 0; i < text.size(); i++)
-    {
-        unsigned char indT = text[i];
-        unsigned char indK = key[i%d];
-        unsigned char sym = (indT-indK)%n;
-        crypted+=sym;
-    //    std::cout << "Text: " << indT << " Key: " << indK << " Shifr: " << (indT+indK)%alphabet.size()+1 << std::endl;
+std::string vidgerDecrypt(std::string text, std::string key) {
+    int text_length = text.length();
+    int key_length = key.length();
+    std::string decrypted_text(text_length, ' ');
+
+    for (int i = 0; i < text_length; i++) {
+        unsigned char t = text[i];
+        unsigned char k = key[i%key_length];
+        if (isspace(t))
+            decrypted_text[i] = t;
+        else
+            decrypted_text[i] = ((t - ' ' + 224 - (k - ' ')) % 224) + ' ';
     }
 
-    return crypted;
+    return decrypted_text;
 }
-
 //RSA
 std::string rsaCrypt(std::string msg, int n, int e)
 {
     std::string crypt = msg;
     for (int i = 0; i<msg.size(); i++)
     {
-        crypt[i] = static_cast<unsigned char>(modulePow(static_cast<unsigned char>(msg[i]), e, n));
-        if(crypt[i]>n)
-            throw "В тексте содержаться недопустимые символы";
+        if (static_cast<unsigned char>(msg[i])>245)
+            crypt [i] = msg[i];
+        else
+            crypt[i] = static_cast<unsigned char>(modulePow(static_cast<unsigned char>(msg[i]), e, n));
     }
 
     return crypt;

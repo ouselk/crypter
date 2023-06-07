@@ -66,7 +66,6 @@ int main()
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 
-
 	const std::string DEFAULT_DECRYPTED_FILENAME = "decrypted.txt";
 	const std::string DEFAULT_ENCRYPTED_FILENAME = "encrypted.txt";
 
