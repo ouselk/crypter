@@ -178,11 +178,16 @@ int checkKeyGF(std::string key)
     {
         throw "Неверно введен ключ (введите число).";
     }
-    int nkey = stoi(key);
-    if (nkey < 1)
+    try {
+        int nkey = stoi(key);
+    }
+    catch (...) {
+        throw "Слишком большое число";
+        }
+    if (stoi(key) < 1)
         throw "Неверно введен ключ (должно быть натуральное число)";
 
-    return nkey;
+    return stoi(key);
 }
 
 std::vector<int> cifGF(int key) {

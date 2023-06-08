@@ -261,80 +261,83 @@ std::string rsaCrypt(std::string msg, int n, int e)
     std::string crypt = msg;
     for (int i = 0; i<msg.size(); i++)
     {
-        if (static_cast<unsigned char>(msg[i])>245)
-            crypt [i] = msg[i];
+        unsigned char sym = msg[i];
+        unsigned char cryptsym = modulePow(static_cast<unsigned char>(msg[i]), e, n);
+        if (sym > 245)
+            crypt[i] = sym;
+
         else
-            crypt[i] = static_cast<unsigned char>(modulePow(static_cast<unsigned char>(msg[i]), e, n));
+            crypt[i] = cryptsym;
     }
 
     return crypt;
 }
 
 std::string rsaDecrypt(std::string msg, int n, int d)
-{    
-    return rsaCrypt(msg, n, d);
+{
+    std::string crypt = msg;
+    for (int i = 0; i < msg.size(); i++)
+    {
+        unsigned char sym = msg[i];
+        unsigned char cryptsym = modulePow(static_cast<unsigned char>(msg[i]), d, n);
+        if (sym > 245)
+            crypt[i] = sym;
+        else
+            crypt[i] = cryptsym;
+    }
+
+    return crypt;
 }
 
 //Gronsfeld
 
 std::string groncfeldCrypted(std::string text, int key) {
-    int step = 0;
-    std::string result;
     //int key_c = checkKey(key);
     std::vector<int>key_cif = cifGF(key);
+    int keyLen = key_cif.size();
+    std::string result = "";
 
-    for (int i = 0; i < text.size(); i++)
+    for (int i = 0; i < text.length(); i++)
     {
-        unsigned char ascii = text[i];
-        int curr_key = key_cif[step];
-        if (ascii == 32)
-            result += " ";
-        if (ascii == '\n')
-            result += '\n';
-        else
-        {
-            if (int(ascii) + curr_key < 256)
-            {
+        unsigned char letter = text[i];
 
-                result += static_cast<unsigned char> (int(ascii) + curr_key);
-            }
+        // Получаем соответствующий символ из ключа
+        int keyIndex = i % keyLen;
+        int keyValue = key_cif[keyIndex];
 
-            else
-                result += static_cast<unsigned char> ((int(ascii) + curr_key) % 223);
-            step = (step + 1) % key_cif.size();
-        }
+        // Шифруем букву
+        unsigned char encryptedLetter = letter;
+        if (!isspace(letter))    
+            encryptedLetter = ((letter - '!' + keyValue) % 224) + '!';
 
+        // Добавляем зашифрованный символ в строку результата
+        result += encryptedLetter;
     }
+
     return result;
 }
 std::string groncfeldDecrypted(std::string crypted_text, int key) {
-    int step = 0;
-    std::string result;
-    //int key_c = checkKey(key);
-    std::vector<int>key_cif = cifGF(key);
+    std::string result = "";
+    std::vector<int> key_cif = cifGF(key);
+    int keyLen = key_cif.size();
 
-    for (int i = 0; i < crypted_text.size(); i++)
+    for (int i = 0; i < crypted_text.length(); i++)
     {
-        unsigned char ascii = crypted_text[i];
-        int curr_key = key_cif[step];
-        if (ascii == 32)
-            result += " ";
-        if (ascii == '\n')
-            result += '\n';
-        else
-        {
-            if (int(ascii) - curr_key < 33)
-            {
-                result += static_cast<unsigned char> ((int(ascii) - curr_key) + 223);
+        unsigned char letter = crypted_text[i];
 
-            }
+        // Получаем соответствующий символ из ключа
+        int keyIndex = i % keyLen;
+        int keyValue = key_cif[keyIndex];
 
-            else
-                result += static_cast<unsigned char> (int(ascii) - curr_key);
-            step = (step + 1) % key_cif.size();
-        }
+        // Расшифровываем букву
+        unsigned char decryptedLetter = letter;
+        if (!isspace(letter))
+            decryptedLetter = ((letter - '!' - keyValue + 224) % 224) + '!';
 
+        // Добавляем расшифрованный символ в строку результата
+        result += decryptedLetter;
     }
+
     return result;
 }
 
