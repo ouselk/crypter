@@ -166,17 +166,22 @@ std::string simpleTableCrypt(std::string text, int n, int m)
     for (auto &col : table)
         col=std::vector<unsigned char>(m);
 //    std::cout << text << std::endl;
-
     int index = 0;
     for (int j = 0; j < m; j++)
         for (int i = 0; i < n; i++)
         {
             if (index>=text.size())
-                throw "Таблица слишком большая для сообщения";
+            {
+                std::cout << text.size()  <<  " - ";
+                throw "необходимый размер для таблицы";
+            }
             table[i][j]=text.at(index++);
         }
-    if (index<text.size()-1)
-        throw "Таблица слишком маленькая для сообщения";
+    if (index < text.size() - 1)
+    {
+        std::cout << text.size() << " - ";
+        throw "необходимый размер для таблицы";
+    }
 
     std::string crypted = "";
     for (int i = 0; i < n; i++)
@@ -197,7 +202,6 @@ std::string simpleTableDecrypt(std::string text, int n, int m)
     std::vector<std::vector<unsigned char>> table(n);
     for (auto &col : table)
         col=std::vector<unsigned char>(m);
-    std::cout << text << std::endl;
 
     int index = 0;
     for (int i = 0; i < n; i++)
@@ -307,8 +311,8 @@ std::string groncfeldCrypted(std::string text, int key) {
 
         // Шифруем букву
         unsigned char encryptedLetter = letter;
-        if (!isspace(letter))    
-            encryptedLetter = ((letter - '!' + keyValue) % 224) + '!';
+        if (!isspace(letter))
+            encryptedLetter = ((letter - '!' + keyValue) % 223) + '!';
 
         // Добавляем зашифрованный символ в строку результата
         result += encryptedLetter;
@@ -332,7 +336,7 @@ std::string groncfeldDecrypted(std::string crypted_text, int key) {
         // Расшифровываем букву
         unsigned char decryptedLetter = letter;
         if (!isspace(letter))
-            decryptedLetter = ((letter - '!' - keyValue + 224) % 224) + '!';
+            decryptedLetter = ((letter - '!' - keyValue + 223) % 223) + '!';
 
         // Добавляем расшифрованный символ в строку результата
         result += decryptedLetter;

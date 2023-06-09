@@ -69,44 +69,78 @@ int main()
 	const std::string DEFAULT_DECRYPTED_FILENAME = "decrypted.txt";
 	const std::string DEFAULT_ENCRYPTED_FILENAME = "encrypted.txt";
 
-	std::string decryptedFilename =
-		getFileName("Введите имя файла, в котором содержится незашифрованный текст:",
-		DEFAULT_DECRYPTED_FILENAME);
-	std::string encryptedFilename = 
-		getFileName("Введите имя файла, в который будет помещен зашифрованный текст:",
-		DEFAULT_ENCRYPTED_FILENAME);
+	int actionAfterCycle = 2; // 0 - если завершить программу, 1 - работа с текущими файлами, 2 - с новыми
+	while (actionAfterCycle == 2)
+	{
+		std::string decryptedFilename =
+			getFileName("Введите имя файла, в котором содержится незашифрованный текст:",
+			DEFAULT_DECRYPTED_FILENAME);
+		std::string encryptedFilename = 
+			getFileName("Введите имя файла, в который будет помещен зашифрованный текст:",
+			DEFAULT_ENCRYPTED_FILENAME);
 
-	if (!fileExists(encryptedFilename))
-	{
-		std::cout << "Не существует файла с названием (или он пустой) " << encryptedFilename << "." << std::endl;
-		std::string password = getPassword("Задайте пароль для работы с программой, который будет помещен в начало файла: ");
-		writeFile(password + '\n', encryptedFilename);
-	}
-	else
-	{
-		std::string userPass;
-		std::string truePass = readString(encryptedFilename, 0);
-		int i = 3;
-		do
+		actionAfterCycle = 1;
+		while (actionAfterCycle==1)
 		{
-			if (i == 0)
-			{
-				std::cout << "Попытка перебора пароля. Программа удаляет файл и завершает работу." << std::endl;
-				remove(encryptedFilename.c_str());
-				return -1;
+		if (!fileExists(encryptedFilename))
+		{
+				std::cout << "Не существует файла с названием (или он пустой) " << encryptedFilename << "." << std::endl;
+				std::string password = getPassword("Задайте пароль для работы с программой, который будет помещен в начало файла: ");
+				writeFile(password + '\n', encryptedFilename);
 			}
-			std::cout << "Осталось " << i << " попытки." << std::endl;
-			userPass = getPassword("Введите пароль для использования программы: ");	
-			if (userPass!=truePass)
-				i--;
-		} while (userPass != truePass);
+			else
+			{
+				std::string userPass;
+				std::string truePass = readString(encryptedFilename, 0);
+				int i = 3;
+				do
+				{
+					if (i == 0)
+					{
+						std::cout << "Попытка перебора пароля. Программа удаляет файл и завершает работу." << std::endl;
+						remove(encryptedFilename.c_str());
+						return -1;
+					}
+					std::cout << "Осталось " << i << " попытки." << std::endl;
+					userPass = getPassword("Введите пароль для использования программы: ");	
+					if (userPass!=truePass)
+						i--;
+				} while (userPass != truePass);
 
 
+			}
+
+			Action action    = getAction();
+			Encryption crypt = getEncryption(ENCRYPTIONS);
+
+			if (doAction(action, crypt, decryptedFilename, encryptedFilename)==0)
+			{
+				std::cout << "Успех!" << std::endl;
+				std::cout << "Файл с зашифрованным текстом: " << encryptedFilename << std::endl;
+				std::cout << "Файл с незашифрованным текстом: " << decryptedFilename << std::endl;
+			}
+
+			actionAfterCycle = -1;
+			do
+			{
+				std::cout << "Что делать дальше?" << std::endl;
+				std::cout << "0) Завершить работу." << std::endl;
+				std::cout << "1) Продолжить работу с текущими файлами." << std::endl;
+				std::cout << "2) Продолжить работу с новыми файлами." << std::endl;
+				std::string temp;
+				getline(std::cin, temp);
+				if (temp.size()!=1)
+					continue;
+				if (!isdigit(temp[0]))
+					continue;
+				if (std::cin.fail())
+				{
+					std::cin.clear();
+					std::cin.ignore('\n');
+					continue;
+				}
+				actionAfterCycle = std::stoi(temp);
+			} while (actionAfterCycle!=0 && actionAfterCycle!=1 && actionAfterCycle!=2);
+		}
 	}
-
-	Action action    = getAction();
-	Encryption crypt = getEncryption(ENCRYPTIONS);
-
-	if (doAction(action, crypt, decryptedFilename, encryptedFilename)==0)
-		std::cout << "Успех!";
 }
